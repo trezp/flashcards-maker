@@ -11,9 +11,6 @@ export default {
   components: {
     Card
   },
-  methods: {
-  
-  },
   setup(){
     initializeApp({
       apiKey: process.env.FIREBASE_API_KEY,
@@ -26,7 +23,7 @@ export default {
     });
 
     const db = getFirestore(); 
-    let cards = ref([])
+    let cards = ref([]);
     
     const getCards = async() => {
       const querySnapshot = await getDocs(collection(db, "cards"));
@@ -35,27 +32,34 @@ export default {
 
     return {
       cards,
-      getCards
+      getCards,
     }
   },
+  data(){},
+  methods: {},
   mounted () {
-    this.getCards() 
+    this.getCards();
   }
 }
 </script>
 
 <template>
   <h1>Flashcards</h1>
-  <ul>
-    <li v-for="card in cards" :key="card.front">
-      <Card 
-        :front="card.front"
-        :back="card.back">
-      </Card>
-    </li>
+  <ul class="cardList">
+    <Card 
+      v-for="card in cards" :key="card.front"
+      :card="card">
+    </Card>
   </ul>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+
+.cardList {
+  display: flex;
+  li {
+    list-style-type: none;
+  }
+}
 
 </style>
