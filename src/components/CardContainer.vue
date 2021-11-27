@@ -12,17 +12,17 @@ export default {
     Card
   },
   methods: {
-    
+  
   },
   setup(){
     initializeApp({
-      apiKey: "AIzaSyBa6XQ6r-inet1wCzrXzgBdqRESMDVAA-0",
+      apiKey: process.env.FIREBASE_API_KEY,
       authDomain: "flashcards-vue.firebaseapp.com",
       projectId: "flashcards-vue",
       storageBucket: "flashcards-vue.appspot.com",
-      messagingSenderId: "34229303061",
-      appId: "1:34229303061:web:67da33d22c73d805b45b1c",
-      measurementId: "G-GYHVPXXCBT"
+      messagingSenderId: process.env.FIREBASE_SENDER_ID,
+      appId: process.env.FIREBASE_APP_ID,
+      measurementId: process.env.FIREBASE_MEASUREMENT_ID
     });
 
     const db = getFirestore(); 
