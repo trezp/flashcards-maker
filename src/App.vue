@@ -10,9 +10,9 @@ export default {
   components: {
     CardContainer
   },
-   setup() {
+  setup() {
 
-   }
+  }
 }
 </script>
 

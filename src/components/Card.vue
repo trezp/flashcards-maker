@@ -2,16 +2,20 @@
   <li class="card" @click="flipCard">
     <div v-show="!flipped" class="card-front">{{ card.front}} </div>
     <div v-show="flipped" class="card-back">{{ card.back }} </div>
+    <button @click="$emit('deleteCard', card.id)">Delete</button>
   </li>
 </template>
 
 <script>
+
 export default {
   props: ["card"],
+  emits: ["deleteCard"],
   methods: {
-    flipCard() {
+    flipCard(event) {
+      event.stopPropagation();
       this.flipped = !this.flipped;
-    },
+    }
   },
   data(){
     return {

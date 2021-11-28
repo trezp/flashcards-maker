@@ -1,9 +1,9 @@
 <script>
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { collection, getDocs } from "firebase/firestore"; 
+import { collection, doc, addDoc, getDocs, deleteDoc } from "firebase/firestore"; 
 
-import { ref } from 'vue'
+import { ref} from 'vue'
 
 import Card from './Card.vue';
 
@@ -23,33 +23,62 @@ export default {
     });
 
     const db = getFirestore(); 
-    let cards = ref([]);
-    
+    const cards = ref([]);
+
     const getCards = async() => {
       const querySnapshot = await getDocs(collection(db, "cards"));
-      querySnapshot.forEach((doc) => cards.value.push(doc.data()));
+      querySnapshot.forEach((doc) => cards.value.push({...doc.data(), "id": doc.id}));
+      
+    }
+
+    const addCard = async() => {
+      await addDoc(collection(db, "cards"), {
+        front: "Hello",
+        back: "hi"
+      });
+
+      cards.value = [];
+      getCards();
+    }
+
+    const deleteCard = async(id) => {
+      await deleteDoc(doc(db, "cards", id));
+      cards.value = [];
+      getCards();
     }
 
     return {
       cards,
+      addCard,
       getCards,
+      deleteCard
     }
   },
-  data(){},
   methods: {},
-  mounted () {
+  mounted() {
     this.getCards();
+  },
+  data(){
+    return {
+      frontCard: '',
+      backCard: ''
+    }
   }
 }
 </script>
 
 <template>
   <h1>Flashcards</h1>
+  <h3>Add New Card</h3>
+  <input type="text" placeholder="Front" v-model="frontCard">
+  <input type="text" placeholder="Front" v-model="backCard">
   <ul class="cardList">
     <Card 
+      @deleteCard="deleteCard"
       v-for="card in cards" :key="card.front"
       :card="card">
     </Card>
+    <button @click="addCard">Add Card</button>
   </ul>
 </template>
 
@@ -57,6 +86,7 @@ export default {
 
 .cardList {
   display: flex;
+  flex-wrap: wrap;
   li {
     list-style-type: none;
   }
