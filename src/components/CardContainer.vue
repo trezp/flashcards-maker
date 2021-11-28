@@ -2,7 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import firebaseConfig from "../firebase.js";
-import { collection, doc, query, onSnapshot, addDoc, deleteDoc } from "firebase/firestore"; 
+import { collection, doc, query, onSnapshot, addDoc, deleteDoc, Timestamp, orderBy } from "firebase/firestore"; 
 
 import Card from './Card.vue';
 
@@ -15,7 +15,8 @@ export default {
       this.cards = [];
       await addDoc(collection(this.db(), "cards"), {
         front: this.front,
-        back: this.back
+        back: this.back,
+        timestamp: Timestamp.fromDate(new Date())
       });
       this.front = '';
       this.back = '';
@@ -28,11 +29,12 @@ export default {
   mounted() {
     initializeApp(firebaseConfig);
 
-    const q = query(collection(this.db(), "cards"));
+    const cardsRef = collection(this.db(), "cards");
+    const q = query(cardsRef, orderBy("timestamp"));
 
     this.unsubscribe = onSnapshot(q, (querySnapshot) => {
       querySnapshot.forEach(doc => {
-        this.cards.push({...doc.data(), id: doc.id})
+        this.cards.push({...doc.data(), id: doc.id, timestamp: Timestamp.fromDate(new Date())})
       });
     })
   },
@@ -63,7 +65,6 @@ export default {
       v-for="card in cards" :key="card.front"
       :card="card">
     </Card>
-   
   </ul>
 </template>
 
