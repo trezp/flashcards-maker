@@ -2,6 +2,7 @@
 node_modules
 /dist
 vuejsconfig.js
+firebase.js
 
 
 # local env files

@@ -1,9 +1,8 @@
 <script>
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { collection, doc, addDoc, getDocs, deleteDoc } from "firebase/firestore"; 
-
-import { ref} from 'vue'
+import firebaseConfig from "../firebase.js";
+import { collection, doc, query, onSnapshot, addDoc, deleteDoc } from "firebase/firestore"; 
 
 import Card from './Card.vue';
 
@@ -11,62 +10,40 @@ export default {
   components: {
     Card
   },
-  setup(){
-    initializeApp({
-      apiKey: process.env.FIREBASE_API_KEY,
-      authDomain: "flashcards-vue.firebaseapp.com",
-      projectId: "flashcards-vue",
-      storageBucket: "flashcards-vue.appspot.com",
-      messagingSenderId: process.env.FIREBASE_SENDER_ID,
-      appId: process.env.FIREBASE_APP_ID,
-      measurementId: process.env.FIREBASE_MEASUREMENT_ID
-    });
-
-    const db = getFirestore(); 
-    const cards = ref([]);
-
-    const getCards = async() => {
-      const querySnapshot = await getDocs(collection(db, "cards"));
-      querySnapshot.forEach((doc) => cards.value.push({...doc.data(), "id": doc.id}));
-      
-    }
-
-    const addCard = async(front, back) => {
-      console.log(front, back)
-      await addDoc(collection(db, "cards"), {
-        front: front,
-        back: back
-      });
-
-      cards.value = [];
-      getCards();
-    }
-
-    const deleteCard = async(id) => {
-      await deleteDoc(doc(db, "cards", id));
-      cards.value = [];
-      getCards();
-    }
-
-    return {
-      cards,
-      addCard,
-      getCards,
-      deleteCard
-    }
-  },
   methods: {
-    createCard(){
-      this.addCard(this.frontCard, this.backCard);
+    async createCard(){
+      this.cards = [];
+      await addDoc(collection(this.db(), "cards"), {
+        front: this.front,
+        back: this.back
+      });
       this.front = '';
       this.back = '';
+    },
+    async deleteCard(id){
+      this.cards = [];
+      await deleteDoc(doc(this.db(), "cards", id));
     }
   },
   mounted() {
-    this.getCards();
+    initializeApp(firebaseConfig);
+
+    const q = query(collection(this.db(), "cards"));
+
+    this.unsubscribe = onSnapshot(q, (querySnapshot) => {
+      querySnapshot.forEach(doc => {
+        this.cards.push({...doc.data(), id: doc.id})
+      });
+    })
+  },
+  unmounted(){
+    this.unsubscribe();
   },
   data(){
     return {
+      db: getFirestore,
+      cards: [],
+      unsubscribe: null,
       front: '',
       back: ''
     }
@@ -77,9 +54,9 @@ export default {
 <template>
   <h1>Flashcards</h1>
   <h3>Add New Card</h3>
-  <input type="text" placeholder="Front" v-model="frontCard">
-  <input type="text" placeholder="Back" v-model="backCard">
-  <button @click="createCard(frontCard, backCard)">Add Card</button>
+  <input type="text" placeholder="Front" v-model="front">
+  <input type="text" placeholder="Back" v-model="back">
+  <button @click="createCard(front, back)">Add Card</button>
   <ul class="cardList">
     <Card 
       @deleteCard="deleteCard"
