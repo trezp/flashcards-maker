@@ -31,10 +31,11 @@ export default {
       
     }
 
-    const addCard = async() => {
+    const addCard = async(front, back) => {
+      console.log(front, back)
       await addDoc(collection(db, "cards"), {
-        front: "Hello",
-        back: "hi"
+        front: front,
+        back: back
       });
 
       cards.value = [];
@@ -54,14 +55,20 @@ export default {
       deleteCard
     }
   },
-  methods: {},
+  methods: {
+    createCard(){
+      this.addCard(this.frontCard, this.backCard);
+      this.front = '';
+      this.back = '';
+    }
+  },
   mounted() {
     this.getCards();
   },
   data(){
     return {
-      frontCard: '',
-      backCard: ''
+      front: '',
+      back: ''
     }
   }
 }
@@ -71,14 +78,15 @@ export default {
   <h1>Flashcards</h1>
   <h3>Add New Card</h3>
   <input type="text" placeholder="Front" v-model="frontCard">
-  <input type="text" placeholder="Front" v-model="backCard">
+  <input type="text" placeholder="Back" v-model="backCard">
+  <button @click="createCard(frontCard, backCard)">Add Card</button>
   <ul class="cardList">
     <Card 
       @deleteCard="deleteCard"
       v-for="card in cards" :key="card.front"
       :card="card">
     </Card>
-    <button @click="addCard">Add Card</button>
+   
   </ul>
 </template>
 
